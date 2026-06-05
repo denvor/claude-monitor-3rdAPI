@@ -1,9 +1,0 @@
-.venv/
-Claude-Code-Usage-Monitor/
-.codegraph/
-__pycache__/
-*.pyc
-*.egg-info/
-dist/
-build/
-PLAN.md
