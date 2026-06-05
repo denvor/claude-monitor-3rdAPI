@@ -27,7 +27,7 @@
 ## 安装
 
 ```bash
-git clone <repo-url>
+git clone https://github.com/denvor/claude-monitor-3rdAPI.git
 cd claude-monitor
 
 python -m venv .venv

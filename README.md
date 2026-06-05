@@ -27,7 +27,7 @@ If you're using **Claude Code + DeepSeek**, this tool ships with built-in DeepSe
 ## Installation
 
 ```bash
-git clone <repo-url>
+git clone https://github.com/denvor/claude-monitor-3rdAPI.git
 cd claude-monitor
 
 python -m venv .venv
