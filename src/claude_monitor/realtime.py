@@ -12,16 +12,15 @@ from rich.table import Table
 from .aggregator import aggregate
 from .calculator import calculate_costs
 from .config import load_pricing
-from .display import format_cost, format_number
+from .display import _table_currency, format_cost, format_number
 from .reader import read_records
-
-CURRENCY_SYMBOLS = {"CNY": "CNY", "USD": "$", "EUR": "EUR"}
 
 
 def run_realtime(
     data_path: Optional[str] = None,
     config_path: Optional[Path] = None,
     refresh_rate: int = 10,
+    days_back: int = 1,
 ) -> None:
     """启动实时监视模式。"""
     pricing, default_pricing = load_pricing(config_path)
@@ -31,13 +30,13 @@ def run_realtime(
     current_data: Optional[Table] = None
 
     def load_data() -> Table:
-        records = read_records(data_path=data_path, days_back=1)
+        records = read_records(data_path=data_path, days_back=days_back)
         if records:
             calculate_costs(records, pricing, default_pricing)
             rows = aggregate(records, "summary")
             if rows:
-                return _build_table(rows, refresh_rate)
-        return _empty_table(refresh_rate)
+                return _build_table(rows)
+        return _empty_table()
 
     try:
         with Live(console=console, refresh_per_second=2, screen=True) as live:
@@ -48,15 +47,16 @@ def run_realtime(
                     current_data = load_data()
                     last_refresh = now
 
-                live.update(_render(current_data, refresh_rate, int(now - last_refresh)))
+                elapsed = int(now - last_refresh)
+                live.update(_render(current_data, refresh_rate, elapsed))
 
                 time.sleep(0.5)
     except KeyboardInterrupt:
         pass
 
 
-def _build_table(rows, refresh_rate: int) -> Table:
-    currency = CURRENCY_SYMBOLS.get(rows[0].currency, rows[0].currency)
+def _build_table(rows) -> Table:
+    currency = _table_currency(rows)
 
     table = Table(expand=False)
     table.add_column("Model", style="cyan")
@@ -100,7 +100,7 @@ def _build_table(rows, refresh_rate: int) -> Table:
     return table
 
 
-def _empty_table(refresh_rate: int) -> Table:
+def _empty_table() -> Table:
     table = Table()
     table.add_column("Status")
     table.add_row("[yellow]Waiting for data...[/yellow]")

@@ -28,6 +28,18 @@ def _create_console() -> Console:
     return Console(force_terminal=True, legacy_windows=False)
 
 
+def _table_currency(rows: list[AggregatedRow]) -> str:
+    """返回表格表头货币标签，多币种时标记为 mixed。"""
+    currencies = {r.currency for r in rows}
+    if len(currencies) == 1:
+        c = currencies.pop()
+        return CURRENCY_SYMBOLS.get(c, c)
+    return "mixed"
+
+
+PERIOD_HEADERS = {"summary": "Period", "daily": "Date", "monthly": "Month"}
+
+
 def display_table(
     rows: list[AggregatedRow],
     mode: str,
@@ -40,8 +52,8 @@ def display_table(
         console.print("[yellow]No usage data found[/yellow]")
         return
 
-    currency = CURRENCY_SYMBOLS.get(rows[0].currency, rows[0].currency)
-    period_header = {"summary": "Period", "daily": "Date", "monthly": "Month"}.get(mode, "Period")
+    currency = _table_currency(rows)
+    period_header = PERIOD_HEADERS.get(mode, "Period")
 
     table = Table(title=f"Claude Code Token Usage ({mode})")
     table.add_column(period_header, style="cyan")
@@ -87,8 +99,8 @@ def display_csv(rows: list[AggregatedRow], mode: str) -> None:
     output = io.StringIO()
     writer = csv.writer(output)
 
-    period_header = {"summary": "Period", "daily": "Date", "monthly": "Month"}.get(mode, "Period")
-    currency = f"Cost({rows[0].currency})" if rows else "Cost"
+    period_header = PERIOD_HEADERS.get(mode, "Period")
+    currency = f"Cost({_table_currency(rows)})" if rows else "Cost"
 
     writer.writerow([
         period_header, "Model", "InputTokens", "OutputTokens",

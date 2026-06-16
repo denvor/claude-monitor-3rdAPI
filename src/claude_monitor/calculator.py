@@ -35,8 +35,7 @@ def calculate_costs(
         record.currency = str(model_pricing["currency"])
 
         # 记录未匹配到具体 section 的模型（使用了 default）
-        model_lower = record.model.lower()
-        if not any(k.lower() in model_lower for k in pricing):
+        if pricing and model_pricing is default_pricing:
             unknown_models.add(record.model)
 
     if unknown_models:
