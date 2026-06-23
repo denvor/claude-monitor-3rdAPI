@@ -21,6 +21,7 @@ def run_realtime(
     config_path: Optional[Path] = None,
     refresh_rate: int = 10,
     days_back: int = 1,
+    today_only: bool = False,
 ) -> None:
     """启动实时监视模式。"""
     pricing, default_pricing = load_pricing(config_path)
@@ -30,7 +31,7 @@ def run_realtime(
     current_data: Optional[Table] = None
 
     def load_data() -> Table:
-        records = read_records(data_path=data_path, days_back=days_back)
+        records = read_records(data_path=data_path, days_back=days_back, today_only=today_only)
         if records:
             calculate_costs(records, pricing, default_pricing)
             rows = aggregate(records, "summary")

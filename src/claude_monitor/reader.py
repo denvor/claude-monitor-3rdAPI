@@ -46,12 +46,14 @@ def find_jsonl_files(data_path: Path) -> list[Path]:
 def read_records(
     data_path: Optional[str] = None,
     days_back: int = 1,
+    today_only: bool = False,
 ) -> list[TokenRecord]:
     """读取并解析 JSONL 文件，返回 token 记录列表。
 
     Args:
         data_path: Claude 数据目录，默认 ~/.claude/projects
         days_back: 分析最近N天，0 表示全部
+        today_only: 仅返回当天（本地零点至今）的数据，优先级高于 days_back
     """
     data_path = Path(data_path if data_path else "~/.claude/projects").expanduser()
     jsonl_files = find_jsonl_files(data_path)
@@ -60,7 +62,10 @@ def read_records(
         return []
 
     cutoff = None
-    if days_back > 0:
+    if today_only:
+        now = local_now()
+        cutoff = now.replace(hour=0, minute=0, second=0, microsecond=0)
+    elif days_back > 0:
         cutoff = local_now() - timedelta(days=days_back)
 
     records: list[TokenRecord] = []

@@ -49,6 +49,11 @@ def parse_args(argv: Optional[list[str]] = None) -> argparse.Namespace:
         help="look back N days (0=all time; summary/realtime default: 1, daily/monthly default: 0)",
     )
     parser.add_argument(
+        "--today",
+        action="store_true",
+        help="only show today's data (from 00:00 local time), overrides --days-back",
+    )
+    parser.add_argument(
         "--csv",
         action="store_true",
         help="output CSV instead of table",
@@ -70,6 +75,7 @@ def main(argv: Optional[list[str]] = None) -> int:
 
     config_path = Path(args.config) if args.config else None
     days_back = args.days_back if args.days_back is not None else DEFAULT_DAYS_BACK.get(args.view, 0)
+    today_only = args.today
 
     # 实时模式 — 持续轮询刷新
     if args.view == "realtime":
@@ -78,12 +84,13 @@ def main(argv: Optional[list[str]] = None) -> int:
             config_path=config_path,
             refresh_rate=args.refresh_rate,
             days_back=days_back,
+            today_only=today_only,
         )
         return 0
 
     # 静态模式 — 一次性输出
     pricing, default_pricing = load_pricing(config_path)
-    records = read_records(data_path=args.data_path, days_back=days_back)
+    records = read_records(data_path=args.data_path, days_back=days_back, today_only=today_only)
 
     if not records:
         print("No token usage data found")
