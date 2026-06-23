@@ -48,10 +48,12 @@ cp monitor.ini ~/.claude/monitor.ini
 ## Usage
 
 ```bash
-claude-monitor                          # realtime mode (default), Ctrl+C to exit
+claude-monitor                          # today's data, realtime mode (default), Ctrl+C to exit
 claude-monitor --view summary           # today's summary
-claude-monitor --view daily             # daily breakdown
-claude-monitor --view monthly           # monthly breakdown
+claude-monitor --view daily             # daily breakdown (all days)
+claude-monitor --view monthly           # monthly breakdown (all months)
+claude-monitor --days-back 7            # last 7 days, realtime
+claude-monitor --view daily --days-back 0  # all available data, daily view
 claude-monitor --view daily --csv       # CSV output
 claude-monitor --refresh-rate 5         # 5-second refresh
 ```
@@ -64,8 +66,8 @@ claude-monitor --refresh-rate 5         # 5-second refresh
 | `--data-path` | path | ~/.claude/projects | Claude data directory |
 | `--config` | path | auto-search | monitor.ini path |
 | `--refresh-rate` | int | 10 | Data refresh interval (seconds) |
-| `--theme` | light, dark, classic, auto | auto | Display theme |
-| `--timezone` | string | auto | Timezone |
+| `--days-back` | int | — | Look back N days (0=all time); overrides today-only default |
+| `--today` | flag | true (realtime/summary) | Show only today's data (00:00 local time) |
 | `--csv` | flag | false | Output as CSV |
 | `--version`, `-v` | flag | false | Show version |
 

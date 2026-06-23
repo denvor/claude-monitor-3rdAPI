@@ -48,10 +48,12 @@ cp monitor.ini ~/.claude/monitor.ini
 ## 使用
 
 ```bash
-claude-monitor                          # 实时模式（默认），Ctrl+C 退出
+claude-monitor                          # 今天数据，实时模式（默认），Ctrl+C 退出
 claude-monitor --view summary           # 今日摘要
-claude-monitor --view daily             # 按日统计
-claude-monitor --view monthly           # 按月统计
+claude-monitor --view daily             # 按日统计（全部天数）
+claude-monitor --view monthly           # 按月统计（全部月份）
+claude-monitor --days-back 7            # 最近 7 天，实时模式
+claude-monitor --view daily --days-back 0  # 全部数据，日报视图
 claude-monitor --view daily --csv       # CSV 输出
 claude-monitor --refresh-rate 5         # 5 秒刷新
 ```
@@ -64,8 +66,8 @@ claude-monitor --refresh-rate 5         # 5 秒刷新
 | `--data-path` | path | ~/.claude/projects | Claude 数据目录 |
 | `--config` | path | 自动搜索 | monitor.ini 路径 |
 | `--refresh-rate` | int | 10 | 数据刷新间隔（秒） |
-| `--theme` | light, dark, classic, auto | auto | 显示主题 |
-| `--timezone` | string | auto | 时区 |
+| `--days-back` | int | — | 回溯 N 天（0=全部）；覆盖 today-only 默认 |
+| `--today` | flag | 是（realtime/summary） | 仅显示当天（本地零点起）的数据 |
 | `--csv` | flag | false | CSV 格式输出 |
 | `--version`, `-v` | flag | false | 显示版本 |
 
