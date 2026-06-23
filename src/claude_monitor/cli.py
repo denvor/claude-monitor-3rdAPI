@@ -46,12 +46,12 @@ def parse_args(argv: Optional[list[str]] = None) -> argparse.Namespace:
         "--days-back",
         type=int,
         default=None,
-        help="look back N days (0=all time; summary/realtime default: 1, daily/monthly default: 0)",
+        help="look back N days (0=all time; default: today only via --today)",
     )
     parser.add_argument(
         "--today",
         action="store_true",
-        help="only show today's data (from 00:00 local time), overrides --days-back",
+        help="only show today's data (00:00 local time) [default for realtime/summary]",
     )
     parser.add_argument(
         "--csv",
@@ -74,8 +74,14 @@ def main(argv: Optional[list[str]] = None) -> int:
         return 0
 
     config_path = Path(args.config) if args.config else None
-    days_back = args.days_back if args.days_back is not None else DEFAULT_DAYS_BACK.get(args.view, 0)
-    today_only = args.today
+
+    # 默认只显示今天的数据，除非显式传了 --days-back
+    if args.days_back is not None:
+        days_back = args.days_back
+        today_only = args.today
+    else:
+        days_back = DEFAULT_DAYS_BACK.get(args.view, 0)
+        today_only = args.view in ("realtime", "summary") or args.today
 
     # 实时模式 — 持续轮询刷新
     if args.view == "realtime":

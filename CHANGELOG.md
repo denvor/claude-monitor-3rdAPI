@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-06-23
+
+### 默认参数变更
+- `cli.py` — 无参数时默认只看今天（`--today`），realtime/summary 视图默认 `today_only=True`
+- `cli.py` — 显式传 `--days-back` 后恢复按天回溯
+- `reader.py` — `read_records()` 默认 `today_only=True`
+- `realtime.py` — `run_realtime()` 默认 `today_only=True`
+
 ## 2026-06-16
 
 ### 代码审查修复

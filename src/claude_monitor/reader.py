@@ -46,7 +46,7 @@ def find_jsonl_files(data_path: Path) -> list[Path]:
 def read_records(
     data_path: Optional[str] = None,
     days_back: int = 1,
-    today_only: bool = False,
+    today_only: bool = True,
 ) -> list[TokenRecord]:
     """读取并解析 JSONL 文件，返回 token 记录列表。
 

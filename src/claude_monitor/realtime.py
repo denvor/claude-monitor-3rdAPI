@@ -21,7 +21,7 @@ def run_realtime(
     config_path: Optional[Path] = None,
     refresh_rate: int = 10,
     days_back: int = 1,
-    today_only: bool = False,
+    today_only: bool = True,
 ) -> None:
     """启动实时监视模式。"""
     pricing, default_pricing = load_pricing(config_path)
