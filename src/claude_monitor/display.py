@@ -24,6 +24,13 @@ def format_cost(c: float) -> str:
     return f"{c:.2f}"
 
 
+def format_hit_rate(rate: float, total: int) -> str:
+    """格式化缓存命中率。总 token 为零时显示 '—'，否则显示百分比。"""
+    if total == 0:
+        return "—"
+    return f"{rate:.1f}%"
+
+
 def _create_console() -> Console:
     return Console(force_terminal=True, legacy_windows=False)
 
@@ -63,6 +70,7 @@ def display_table(
     table.add_column("Cache Write", justify="right")
     table.add_column("Cache Read", justify="right")
     table.add_column("Requests", justify="right")
+    table.add_column("Cache Hit Rate", justify="right")
     table.add_column(f"Cost ({currency})", justify="right", style="green")
 
     totals = AggregatedRow(period="Total", model="")
@@ -75,6 +83,7 @@ def display_table(
             format_number(row.cache_create_tokens),
             format_number(row.cache_read_tokens),
             str(row.request_count),
+            format_hit_rate(row.cache_hit_rate, row.cache_read_tokens + row.cache_create_tokens + row.input_tokens),
             format_cost(row.total_cost),
         )
         _sum_row(totals, row)
@@ -89,6 +98,7 @@ def display_table(
             f"[bold]{format_number(totals.cache_create_tokens)}[/bold]",
             f"[bold]{format_number(totals.cache_read_tokens)}[/bold]",
             f"[bold]{totals.request_count}[/bold]",
+            format_hit_rate(totals.cache_hit_rate, totals.cache_read_tokens + totals.cache_create_tokens + totals.input_tokens),
             f"[bold green]{format_cost(totals.total_cost)}[/bold green]",
         )
 
@@ -104,7 +114,7 @@ def display_csv(rows: list[AggregatedRow], mode: str) -> None:
 
     writer.writerow([
         period_header, "Model", "InputTokens", "OutputTokens",
-        "CacheWrite", "CacheRead", "Requests", currency,
+        "CacheWrite", "CacheRead", "Requests", "CacheHitRate", currency,
     ])
 
     for row in rows:
@@ -116,6 +126,7 @@ def display_csv(rows: list[AggregatedRow], mode: str) -> None:
             row.cache_create_tokens,
             row.cache_read_tokens,
             row.request_count,
+            format_hit_rate(row.cache_hit_rate, row.cache_read_tokens + row.cache_create_tokens + row.input_tokens),
             format_cost(row.total_cost),
         ])
 

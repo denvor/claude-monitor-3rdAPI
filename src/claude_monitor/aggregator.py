@@ -24,6 +24,14 @@ class AggregatedRow:
     def total_tokens(self) -> int:
         return self.input_tokens + self.output_tokens
 
+    @property
+    def cache_hit_rate(self) -> float:
+        """缓存命中率: cache_read / (cache_read + cache_create + input) * 100。"""
+        denominator = self.cache_read_tokens + self.cache_create_tokens + self.input_tokens
+        if denominator == 0:
+            return 0.0
+        return self.cache_read_tokens / denominator * 100
+
 
 def aggregate(
     records: list[TokenRecord],

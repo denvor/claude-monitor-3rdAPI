@@ -12,7 +12,7 @@ from rich.table import Table
 from .aggregator import aggregate
 from .calculator import calculate_costs
 from .config import load_pricing
-from .display import _table_currency, format_cost, format_number
+from .display import _table_currency, format_cost, format_hit_rate, format_number
 from .reader import read_records
 
 
@@ -66,6 +66,7 @@ def _build_table(rows) -> Table:
     table.add_column("Cache Write", justify="right")
     table.add_column("Cache Read", justify="right")
     table.add_column("Requests", justify="right")
+    table.add_column("Cache Hit Rate", justify="right")
     table.add_column(f"Cost ({currency})", justify="right", style="green")
 
     total_input = total_output = total_cw = total_cr = total_requests = total_cost = 0
@@ -78,6 +79,7 @@ def _build_table(rows) -> Table:
             format_number(row.cache_create_tokens),
             format_number(row.cache_read_tokens),
             str(row.request_count),
+            format_hit_rate(row.cache_hit_rate, row.cache_read_tokens + row.cache_create_tokens + row.input_tokens),
             format_cost(row.total_cost),
         )
         total_input += row.input_tokens
@@ -88,6 +90,8 @@ def _build_table(rows) -> Table:
         total_cost += row.total_cost
 
     table.add_section()
+    total_cache_input = total_cr + total_cw + total_input
+    total_hit_rate = (total_cr / total_cache_input * 100) if total_cache_input else 0.0
     table.add_row(
         "[bold]Total[/bold]",
         f"[bold]{format_number(total_input)}[/bold]",
@@ -95,6 +99,7 @@ def _build_table(rows) -> Table:
         f"[bold]{format_number(total_cw)}[/bold]",
         f"[bold]{format_number(total_cr)}[/bold]",
         f"[bold]{total_requests}[/bold]",
+        format_hit_rate(total_hit_rate, total_cache_input),
         f"[bold green]{format_cost(total_cost)}[/bold green]",
     )
 
