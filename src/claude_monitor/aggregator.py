@@ -17,6 +17,8 @@ class AggregatedRow:
     cache_create_tokens: int = 0
     cache_read_tokens: int = 0
     total_cost: float = 0.0
+    peak_cost: float = 0.0
+    offpeak_cost: float = 0.0
     request_count: int = 0
     currency: str = "CNY"
 
@@ -87,6 +89,8 @@ def _add_record(row: AggregatedRow, record: TokenRecord) -> None:
     row.cache_create_tokens += record.cache_creation_tokens
     row.cache_read_tokens += record.cache_read_tokens
     row.total_cost += record.cost
+    row.peak_cost += record.peak_cost
+    row.offpeak_cost += record.offpeak_cost
     row.request_count += 1
     if record.currency:
         row.currency = record.currency
