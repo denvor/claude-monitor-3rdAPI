@@ -1,5 +1,17 @@
 # Changelog
 
+## 2026-08-19
+
+### Peak/off-peak pricing support (v1.1.0)
+- `config.py` — Section names support `@YYYY-MM-DD` effective-date suffix; sections support `peak_hours`, `tz` and `peak_*` price keys; new `resolve_pricing()` resolves (entry, is_peak, used_default) per model and record time; removed `find_model_pricing()`
+- `config.py` — Config search now honors the documented priority (first existing file wins; previously `./monitor.ini` and `~/.claude/monitor.ini` were merged)
+- `reader.py` — `TokenRecord` gains `peak_cost`/`offpeak_cost` fields
+- `calculator.py` — Per-record pricing resolved by timestamp (effective date + peak/off-peak tier); cost split into peak/off-peak
+- `aggregator.py` — `AggregatedRow` gains `peak_cost`/`offpeak_cost` accumulation
+- `display.py`, `realtime.py` — Tables and CSV gain `Peak`/`Off-peak` (CSV: `PeakCost`/`OffpeakCost`) columns
+- `monitor.ini` — DeepSeek v4-pro/v4-flash gain `@2026-08-17` sections with official peak/off-peak prices; old sections kept for pre-2026-08-17 data
+- Version 1.0.0 → 1.1.0
+
 ## 2026-06-23
 
 ### Default parameter change

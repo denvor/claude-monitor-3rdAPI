@@ -113,6 +113,34 @@ currency=CNY
 - Unmatched models fall back to `[default]`
 - Cost formula: `(tokens / 1,000,000) * price_per_million`
 
+### Effective Dates & Peak/Off-Peak Pricing
+
+Sections support two optional extensions (works with any provider; omit them to keep flat pricing):
+
+- **`@YYYY-MM-DD` suffix** in the section name — pricing takes effect from 00:00 (in the section's `tz`) on that date. The version with the latest effective date not after the record time is used; records older than all dated versions fall back to the undated version, then `[default]`.
+- **`peak_hours`** — comma-separated peak hour ranges `start-end` (half-open `[start:00, end:00)`), evaluated in the section's timezone.
+- **`tz`** — IANA timezone used for peak detection and the effective date (default: system local time).
+- **`peak_input_price` / `peak_output_price` / `peak_cache_write_price` / `peak_cache_read_price`** — prices applied during peak hours.
+
+Example (DeepSeek peak/off-peak pricing, effective 2026-08-17, peak = Beijing time 9:00–12:00 & 14:00–18:00):
+
+```ini
+[deepseek-v4-pro@2026-08-17]
+peak_hours=9-12,14-18
+tz=Asia/Shanghai
+input_price=4.50
+output_price=13.50
+cache_write_price=4.50
+cache_read_price=0.15
+peak_input_price=9.00
+peak_output_price=27.00
+peak_cache_write_price=9.00
+peak_cache_read_price=0.30
+currency=CNY
+```
+
+Tables and CSV also show `Peak` / `Off-peak` cost-split columns (cost billed at peak vs off-peak rates; models without peak config always show 0 in Peak).
+
 ## How It Works
 
 Claude Code writes session data as JSONL files under `~/.claude/projects/`. `claude-monitor` scans these files, extracts token usage from `type=assistant` entries, applies pricing from `monitor.ini`, and displays the results.

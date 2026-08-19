@@ -1,5 +1,17 @@
 # Changelog
 
+## 2026-08-19
+
+### 峰谷分时计价支持（v1.1.0）
+- `config.py` — section 名支持 `@YYYY-MM-DD` 生效日期后缀；section 支持 `peak_hours`、`tz` 与 `peak_*` 价格键；新增 `resolve_pricing()` 按模型与记录时间解析 (entry, is_peak, used_default)；移除 `find_model_pricing()`
+- `config.py` — 配置搜索改为遵循文档化优先级（取第一个存在的文件；原先 `./monitor.ini` 与 `~/.claude/monitor.ini` 会被合并加载）
+- `reader.py` — `TokenRecord` 增加 `peak_cost`/`offpeak_cost` 字段
+- `calculator.py` — 按记录时间（生效日期 + 峰谷层级）逐条计价，成本拆分为峰/谷
+- `aggregator.py` — `AggregatedRow` 增加 `peak_cost`/`offpeak_cost` 累加
+- `display.py`、`realtime.py` — 表格与 CSV 增加 `Peak`/`Off-peak`（CSV: `PeakCost`/`OffpeakCost`）列
+- `monitor.ini` — DeepSeek v4-pro/v4-flash 增加 `@2026-08-17` 官方峰谷价格 section；旧 section 保留用于 2026-08-17 之前的数据
+- 版本 1.0.0 → 1.1.0
+
 ## 2026-06-23
 
 ### 默认参数变更

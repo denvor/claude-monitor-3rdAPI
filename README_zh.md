@@ -113,6 +113,34 @@ currency=CNY
 - 未匹配模型回退到 `[default]`
 - 费用公式：`(tokens / 1,000,000) * price_per_million`
 
+### 生效日期与峰谷分时计价
+
+section 支持两个可选扩展（任意供应商可用；不配置则维持平价）：
+
+- **section 名 `@YYYY-MM-DD` 后缀** — 定价自该日期 00:00（section 的 `tz` 时区）起生效。同一模型取“生效日期最大且不超过记录时间”的版本；记录早于所有带日期版本时回退无日期版本，再回退 `[default]`。
+- **`peak_hours`** — 逗号分隔的高峰整点区间 `start-end`（半开区间 `[start:00, end:00)`），按 section 时区判定。
+- **`tz`** — 高峰判定与生效日期所用 IANA 时区（缺省为系统本地时区）。
+- **`peak_input_price` / `peak_output_price` / `peak_cache_write_price` / `peak_cache_read_price`** — 高峰时段价格。
+
+示例（DeepSeek 峰谷定价，2026-08-17 生效；高峰 = 北京时间 9:00–12:00 与 14:00–18:00）：
+
+```ini
+[deepseek-v4-pro@2026-08-17]
+peak_hours=9-12,14-18
+tz=Asia/Shanghai
+input_price=4.50
+output_price=13.50
+cache_write_price=4.50
+cache_read_price=0.15
+peak_input_price=9.00
+peak_output_price=27.00
+peak_cache_write_price=9.00
+peak_cache_read_price=0.30
+currency=CNY
+```
+
+表格与 CSV 同时展示 `Peak` / `Off-peak` 成本拆分列（按峰/谷费率计的成本；无峰谷配置的模型 Peak 恒为 0）。
+
 ## 工作原理
 
 Claude Code 将对话数据写入 `~/.claude/projects/` 下的 JSONL 文件。`claude-monitor` 扫描这些文件，从 `type=assistant` 条目中提取 token 用量，应用 `monitor.ini` 中的定价，然后展示结果。
