@@ -72,6 +72,8 @@ def display_table(
     table.add_column("Requests", justify="right")
     table.add_column("Cache Hit Rate", justify="right")
     table.add_column(f"Cost ({currency})", justify="right", style="green")
+    table.add_column("Peak", justify="right")
+    table.add_column("Off-peak", justify="right")
 
     totals = AggregatedRow(period="Total", model="")
     for row in rows:
@@ -85,6 +87,8 @@ def display_table(
             str(row.request_count),
             format_hit_rate(row.cache_hit_rate, row.cache_read_tokens + row.cache_create_tokens + row.input_tokens),
             format_cost(row.total_cost),
+            format_cost(row.peak_cost),
+            format_cost(row.offpeak_cost),
         )
         _sum_row(totals, row)
 
@@ -100,6 +104,8 @@ def display_table(
             f"[bold]{totals.request_count}[/bold]",
             format_hit_rate(totals.cache_hit_rate, totals.cache_read_tokens + totals.cache_create_tokens + totals.input_tokens),
             f"[bold green]{format_cost(totals.total_cost)}[/bold green]",
+            f"[bold green]{format_cost(totals.peak_cost)}[/bold green]",
+            f"[bold green]{format_cost(totals.offpeak_cost)}[/bold green]",
         )
 
     console.print(table)
@@ -115,6 +121,7 @@ def display_csv(rows: list[AggregatedRow], mode: str) -> None:
     writer.writerow([
         period_header, "Model", "InputTokens", "OutputTokens",
         "CacheWrite", "CacheRead", "Requests", "CacheHitRate", currency,
+        "PeakCost", "OffpeakCost",
     ])
 
     for row in rows:
@@ -128,6 +135,8 @@ def display_csv(rows: list[AggregatedRow], mode: str) -> None:
             row.request_count,
             format_hit_rate(row.cache_hit_rate, row.cache_read_tokens + row.cache_create_tokens + row.input_tokens),
             format_cost(row.total_cost),
+            format_cost(row.peak_cost),
+            format_cost(row.offpeak_cost),
         ])
 
     print(output.getvalue(), end="")
@@ -139,4 +148,6 @@ def _sum_row(target: AggregatedRow, source: AggregatedRow) -> None:
     target.cache_create_tokens += source.cache_create_tokens
     target.cache_read_tokens += source.cache_read_tokens
     target.total_cost += source.total_cost
+    target.peak_cost += source.peak_cost
+    target.offpeak_cost += source.offpeak_cost
     target.request_count += source.request_count
