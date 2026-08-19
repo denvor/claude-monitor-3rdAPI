@@ -10,6 +10,7 @@
 - `aggregator.py` — `AggregatedRow` gains `peak_cost`/`offpeak_cost` accumulation
 - `display.py`, `realtime.py` — Tables and CSV gain `Peak`/`Off-peak` (CSV: `PeakCost`/`OffpeakCost`) columns
 - `monitor.ini` — DeepSeek v4-pro/v4-flash gain `@2026-08-17` sections with official peak/off-peak prices; old sections kept for pre-2026-08-17 data
+- `monitor.ini` — Added `Qwen3.8` (zero-cost) and `LongCat-2.0` pricing presets
 - Version 1.0.0 → 1.1.0
 
 ## 2026-06-23

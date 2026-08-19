@@ -10,6 +10,7 @@
 - `aggregator.py` — `AggregatedRow` 增加 `peak_cost`/`offpeak_cost` 累加
 - `display.py`、`realtime.py` — 表格与 CSV 增加 `Peak`/`Off-peak`（CSV: `PeakCost`/`OffpeakCost`）列
 - `monitor.ini` — DeepSeek v4-pro/v4-flash 增加 `@2026-08-17` 官方峰谷价格 section；旧 section 保留用于 2026-08-17 之前的数据
+- `monitor.ini` — 新增 `Qwen3.8`（零价）与 `LongCat-2.0` 定价预设
 - 版本 1.0.0 → 1.1.0
 
 ## 2026-06-23
