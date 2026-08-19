@@ -32,6 +32,8 @@ class TokenRecord:
     cache_creation_tokens: int
     cache_read_tokens: int
     cost: float = 0.0
+    peak_cost: float = 0.0
+    offpeak_cost: float = 0.0
     currency: str = "CNY"
 
 
