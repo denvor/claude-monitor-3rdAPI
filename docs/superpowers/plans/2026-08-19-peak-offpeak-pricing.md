@@ -91,10 +91,13 @@ def load_pricing(
     默认定价列表：所有 [default] 与 [default@日期] entry；
     未找到配置文件时返回 ([], [内置默认])。
     """
+    # 无显式 --config 时，按搜索顺序取第一个存在的文件（README 优先级表）；
+    # 全部不存在时 read([]) 返回空列表，走内置默认
     if config_path:
         paths_to_try = [Path(config_path)]
     else:
-        paths_to_try = CONFIG_SEARCH_PATHS
+        first = next((p for p in CONFIG_SEARCH_PATHS if p.exists()), None)
+        paths_to_try = [first] if first else []
 
     parser = configparser.ConfigParser()
     found = parser.read([str(p) for p in paths_to_try], encoding="utf-8")
@@ -395,6 +398,19 @@ for (name, _, _, expect), r in zip(cases, records):
 assert records[2].peak_cost == 9.0 and records[2].offpeak_cost == 0.0      # 高峰
 assert records[1].peak_cost == 0.0 and records[1].offpeak_cost == 4.5      # 闲时
 assert records[0].peak_cost == 0.0 and records[0].offpeak_cost == 3.0      # 旧价段计入 Off-peak 列
+
+# 配置搜索：第一个存在的文件生效，第二个被忽略（不再合并）
+import claude_monitor.config as cfg
+d1, d2 = tempfile.mkdtemp(), tempfile.mkdtemp()
+(Path(d1) / "monitor.ini").write_text("[default]\ninput_price=1.11\noutput_price=2.22\ncurrency=USD\n")
+(Path(d2) / "monitor.ini").write_text("[default]\ninput_price=9.99\noutput_price=9.99\ncurrency=EUR\n")
+saved = list(cfg.CONFIG_SEARCH_PATHS)
+cfg.CONFIG_SEARCH_PATHS = [Path(d1) / "monitor.ini", Path(d2) / "monitor.ini"]
+try:
+    p3, d3 = cfg.load_pricing()
+finally:
+    cfg.CONFIG_SEARCH_PATHS = saved
+assert p3 == {} and float(d3[0]["input_price"]) == 1.11 and d3[0]["currency"] == "USD", (p3, d3)
 print("OK: Task 1 边界验证全部通过")
 EOF
 ```
@@ -931,6 +947,7 @@ currency=CNY
 
 ### Peak/off-peak pricing support (v1.1.0)
 - `config.py` — Section names support `@YYYY-MM-DD` effective-date suffix; sections support `peak_hours`, `tz` and `peak_*` price keys; new `resolve_pricing()` resolves (entry, is_peak, used_default) per model and record time; removed `find_model_pricing()`
+- `config.py` — Config search now honors the documented priority (first existing file wins; previously `./monitor.ini` and `~/.claude/monitor.ini` were merged)
 - `reader.py` — `TokenRecord` gains `peak_cost`/`offpeak_cost` fields
 - `calculator.py` — Per-record pricing resolved by timestamp (effective date + peak/off-peak tier); cost split into peak/off-peak
 - `aggregator.py` — `AggregatedRow` gains `peak_cost`/`offpeak_cost` accumulation
@@ -946,6 +963,7 @@ currency=CNY
 
 ### 峰谷分时计价支持（v1.1.0）
 - `config.py` — section 名支持 `@YYYY-MM-DD` 生效日期后缀；section 支持 `peak_hours`、`tz` 与 `peak_*` 价格键；新增 `resolve_pricing()` 按模型与记录时间解析 (entry, is_peak, used_default)；移除 `find_model_pricing()`
+- `config.py` — 配置搜索改为遵循文档化优先级（取第一个存在的文件；原先 `./monitor.ini` 与 `~/.claude/monitor.ini` 会被合并加载）
 - `reader.py` — `TokenRecord` 增加 `peak_cost`/`offpeak_cost` 字段
 - `calculator.py` — 按记录时间（生效日期 + 峰谷层级）逐条计价，成本拆分为峰/谷
 - `aggregator.py` — `AggregatedRow` 增加 `peak_cost`/`offpeak_cost` 累加
@@ -978,5 +996,6 @@ git commit -m "docs: 峰谷计价文档（双语 README/CHANGELOG），版本升
 ## Self-Review 记录
 
 - **Spec 覆盖**：配置格式（Task 1 + Task 5）、解析规则 1-5（Task 1 的 resolve_pricing + 边界脚本）、token 语义映射（Task 1 calculator 的 cache_write/cache_read 用价）、6 文件改动（Task 1-4）、错误处理宽容策略（Task 1 的 _parse_* 警告回退）、展示语义（Task 3/4 + README）、配套更新（Task 5/6）、验证方式（每任务 heredoc + 冒烟）— 全覆盖
+- **计划外增补（用户批准）**：config 搜索合并行为修复——取第一个存在的文件生效，并入 Task 1（代码 + 验证断言 + CHANGELOG 条目）
 - **占位符**：无 TBD/TODO，所有代码步骤含完整代码
 - **类型一致性**：`resolve_pricing -> (entry, is_peak, used_default)` 三值解包在 calculator/Task 5 脚本中一致；`load_pricing -> (dict, list)` 两值解包在 cli/realtime/脚本中一致；`AggregatedRow`/`TokenRecord` 新字段名 `peak_cost`/`offpeak_cost` 全计划统一
