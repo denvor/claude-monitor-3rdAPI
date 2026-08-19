@@ -68,8 +68,11 @@ def _build_table(rows) -> Table:
     table.add_column("Requests", justify="right")
     table.add_column("Cache Hit Rate", justify="right")
     table.add_column(f"Cost ({currency})", justify="right", style="green")
+    table.add_column("Peak", justify="right")
+    table.add_column("Off-peak", justify="right")
 
     total_input = total_output = total_cw = total_cr = total_requests = total_cost = 0
+    total_peak = total_offpeak = 0
 
     for row in rows:
         table.add_row(
@@ -81,6 +84,8 @@ def _build_table(rows) -> Table:
             str(row.request_count),
             format_hit_rate(row.cache_hit_rate, row.cache_read_tokens + row.cache_create_tokens + row.input_tokens),
             format_cost(row.total_cost),
+            format_cost(row.peak_cost),
+            format_cost(row.offpeak_cost),
         )
         total_input += row.input_tokens
         total_output += row.output_tokens
@@ -88,6 +93,8 @@ def _build_table(rows) -> Table:
         total_cr += row.cache_read_tokens
         total_requests += row.request_count
         total_cost += row.total_cost
+        total_peak += row.peak_cost
+        total_offpeak += row.offpeak_cost
 
     table.add_section()
     total_cache_input = total_cr + total_cw + total_input
@@ -101,6 +108,8 @@ def _build_table(rows) -> Table:
         f"[bold]{total_requests}[/bold]",
         format_hit_rate(total_hit_rate, total_cache_input),
         f"[bold green]{format_cost(total_cost)}[/bold green]",
+        f"[bold green]{format_cost(total_peak)}[/bold green]",
+        f"[bold green]{format_cost(total_offpeak)}[/bold green]",
     )
 
     return table
