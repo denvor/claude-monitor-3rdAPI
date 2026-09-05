@@ -186,11 +186,16 @@ def resolve_pricing(
 
     规则：
     1. base_name（去 @日期 的基础名）对模型名做大小写不敏感子串匹配
-    2. 版本选择：生效日期最大且 ≤ timestamp 的版本；无版本满足时间条件视为未匹配
-    3. 未匹配 → [default]（同样支持带日期版本）；default 也无可用版本 → 内置默认
+    2. 多个不同 section 同时命中时，base_name 最长（最具体）的优先
+    3. 版本选择：生效日期最大且 ≤ timestamp 的版本；无版本满足时间条件视为未匹配
+    4. 未匹配 → [default]（同样支持带日期版本）；default 也无可用版本 → 内置默认
     """
     model_lower = model_name.lower()
     matched = [e for e in pricing.values() if e["base_name"].lower() in model_lower]
+    if matched:
+        # 最具体的 section 名优先（如 [Qwen3.8-flash] 胜过 [Qwen3.8]）
+        max_len = max(len(e["base_name"]) for e in matched)
+        matched = [e for e in matched if len(e["base_name"]) == max_len]
     entry = _best_entry(matched, timestamp)
     used_default = False
     if entry is None:

@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-09-05
+
+### Fix: most-specific section wins in model matching
+- `config.py` — `resolve_pricing()` now prefers the longest matching `base_name` before applying effective-date selection (e.g. `[Qwen3.8-flash]` beats `[Qwen3.8]` for model `qwen3.8-flash`; previously file order decided the tie)
+- `monitor.ini` — Added `Qwen3.8-flash` pricing preset (0.8 / 2.7 / 1.25 / 0.1 CNY)
+
 ## 2026-08-19
 
 ### Peak/off-peak pricing support (v1.1.0)

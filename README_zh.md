@@ -109,7 +109,7 @@ currency=CNY
 ```
 
 - 价格单位：**每百万 token**
-- 模型匹配：section 名对 model 做**大小写不敏感子串匹配**
+- 模型匹配：section 名对 model 做**大小写不敏感子串匹配**；多个 section 同时命中时，名字最长（最具体）的优先（如 `[Qwen3.8-flash]` 胜过 `[Qwen3.8]`）
 - 未匹配模型回退到 `[default]`
 - 费用公式：`(tokens / 1,000,000) * price_per_million`
 

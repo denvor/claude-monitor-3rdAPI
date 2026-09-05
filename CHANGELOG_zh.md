@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-09-05
+
+### 修复：模型匹配时更具体的 section 优先
+- `config.py` — `resolve_pricing()` 在做生效日期版本选择前，先按 `base_name` 最长匹配过滤（如 `qwen3.8-flash` 命中 `[Qwen3.8-flash]` 而非 `[Qwen3.8]`；此前平局由文件顺序决定）
+- `monitor.ini` — 新增 `Qwen3.8-flash` 定价预设（0.8 / 2.7 / 1.25 / 0.1 CNY）
+
 ## 2026-08-19
 
 ### 峰谷分时计价支持（v1.1.0）

@@ -109,7 +109,7 @@ currency=CNY
 ```
 
 - Prices are **per 1 million tokens**
-- Model matching: **case-insensitive substring match** against section names
+- Model matching: **case-insensitive substring match** against section names; when multiple sections match, the longest (most specific) name wins (e.g. `[Qwen3.8-flash]` beats `[Qwen3.8]`)
 - Unmatched models fall back to `[default]`
 - Cost formula: `(tokens / 1,000,000) * price_per_million`
 
