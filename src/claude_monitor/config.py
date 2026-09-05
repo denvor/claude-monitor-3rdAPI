@@ -34,6 +34,7 @@ def load_pricing(
       effective（aware datetime 或 None，None=无生效日期限制）
       tz（ZoneInfo 或 None，None=系统本地时区）
       peak_hours（[(start_hour, end_hour), ...]，空列表=无峰谷）
+      peak_days（frozenset[int] ISO 星期 1-7 或 None，None=全周）
       peak_input_price ... peak_cache_read_price（float 或 None）
     默认定价列表：所有 [default] 与 [default@日期] entry；
     未找到配置文件时返回 ([], [内置默认])。
@@ -62,12 +63,14 @@ def load_pricing(
         tz = _parse_tz(sec.get("tz"))
         effective = _parse_effective_date(date_suffix, tz) if date_suffix else None
         peak_hours = _parse_peak_hours(sec["peak_hours"]) if "peak_hours" in sec else []
+        peak_days = _parse_peak_days(sec["peak_days"]) if "peak_days" in sec else None
 
         entry: dict[str, object] = {
             "base_name": base,
             "effective": effective,
             "tz": tz,
             "peak_hours": peak_hours,
+            "peak_days": peak_days,
             "currency": sec.get("currency", "CNY"),
         }
         for key in _PRICE_KEYS:
@@ -137,6 +140,35 @@ def _parse_peak_hours(raw: str) -> list[tuple[int, int]]:
     return ranges
 
 
+_WEEKDAYS = {"mon": 1, "tue": 2, "wed": 3, "thu": 4, "fri": 5, "sat": 6, "sun": 7}
+
+
+def _parse_peak_days(raw: str) -> Optional[frozenset[int]]:
+    """解析 'mon-fri' 或 'mon,wed,fri' 为 ISO 星期集合（1-7）；格式错误返回 None（按全周处理）。
+
+    区间为闭区间（支持跨周末，如 fri-mon）；缺省（未配置）表示全周七天。
+    """
+    days: set[int] = set()
+    for part in raw.split(","):
+        part = part.strip().lower()
+        if not part:
+            continue
+        try:
+            if "-" in part:
+                s, e = (_WEEKDAYS[x.strip()] for x in part.split("-"))
+            else:
+                s = e = _WEEKDAYS[part]
+        except KeyError:
+            logger.warning("peak_days '%s' 无法解析，该 section 按全周处理", raw)
+            return None
+        if s <= e:
+            days.update(range(s, e + 1))
+        else:  # 跨周末区间，如 fri-mon
+            days.update(range(s, 8))
+            days.update(range(1, e + 1))
+    return frozenset(days) if days else None
+
+
 def _builtin_default() -> dict[str, object]:
     """内置默认定价（当没有 monitor.ini 时使用）。"""
     entry: dict[str, object] = {
@@ -144,6 +176,7 @@ def _builtin_default() -> dict[str, object]:
         "effective": None,
         "tz": None,
         "peak_hours": [],
+        "peak_days": None,
         "currency": "CNY",
     }
     for key in _PRICE_KEYS:
@@ -167,13 +200,16 @@ def _best_entry(
 
 
 def _is_peak_at(entry: dict[str, object], timestamp: datetime) -> bool:
-    """判断 timestamp 是否落入 entry 的 peak_hours（按 entry 的 tz 换算小时）。"""
+    """判断 timestamp 是否落入 entry 的高峰（先按 peak_days 查星期，再按 peak_hours 查小时；均按 entry 的 tz 换算）。"""
     ranges = entry["peak_hours"]
     if not ranges:
         return False
     tz = entry["tz"] or datetime.now().astimezone().tzinfo
-    hour = timestamp.astimezone(tz).hour
-    return any(s <= hour < e for s, e in ranges)
+    local = timestamp.astimezone(tz)
+    days = entry.get("peak_days")
+    if days is not None and local.isoweekday() not in days:
+        return False
+    return any(s <= local.hour < e for s, e in ranges)
 
 
 def resolve_pricing(

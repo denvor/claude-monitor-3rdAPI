@@ -6,6 +6,11 @@
 - `config.py` — `resolve_pricing()` matches model names by case-insensitive **equality** with the section `base_name` (was substring match, which let a short section like `[Qwen3.8]` silently shadow more specific names); unmatched models fall back to `[default]`
 - `monitor.ini` — Added `Qwen3.8-flash` pricing preset (0.8 / 2.7 / 1.25 / 0.1 CNY)
 
+### Weekday-restricted peak hours — `peak_days` (v1.2.0)
+- `config.py` — Sections support optional `peak_days` (weekday tokens `mon`–`sun` / ranges, inclusive, wrap-around allowed; default = all days); `_is_peak_at()` checks weekday before hour
+- `monitor.ini` — DeepSeek v4-pro/v4-flash gain `@2026-08-23` sections with `peak_days=mon-fri` (official rule change: weekends are off-peak all day; prices unchanged); `@2026-08-17` sections kept for 8/17–8/22 data
+- Version 1.1.0 → 1.2.0
+
 ## 2026-08-19
 
 ### Peak/off-peak pricing support (v1.1.0)

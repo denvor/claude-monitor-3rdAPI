@@ -6,6 +6,11 @@
 - `config.py` — `resolve_pricing()` 将模型名与 section `base_name` 做大小写不敏感**完全匹配**（原为子串匹配，导致 `[Qwen3.8]` 这类短名会静默遮蔽更具体的 section）；未命中的模型回退 `[default]`
 - `monitor.ini` — 新增 `Qwen3.8-flash` 定价预设（0.8 / 2.7 / 1.25 / 0.1 CNY）
 
+### 高峰仅限工作日 — `peak_days`（v1.2.0）
+- `config.py` — section 支持可选 `peak_days`（星期 token `mon`–`sun` / 区间，闭区间、支持跨周末；缺省=全周）；`_is_peak_at()` 先判星期再判小时
+- `monitor.ini` — DeepSeek v4-pro/v4-flash 增加 `@2026-08-23` section（`peak_days=mon-fri`，官方规则变更：周末全天低谷价，价格数值不变）；`@2026-08-17` section 保留用于 8/17–8/22 数据
+- 版本 1.1.0 → 1.2.0
+
 ## 2026-08-19
 
 ### 峰谷分时计价支持（v1.1.0）

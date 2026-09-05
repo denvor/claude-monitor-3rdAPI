@@ -119,6 +119,7 @@ Sections support two optional extensions (works with any provider; omit them to 
 
 - **`@YYYY-MM-DD` suffix** in the section name — pricing takes effect from 00:00 (in the section's `tz`) on that date. The version with the latest effective date not after the record time is used; records older than all dated versions fall back to the undated version, then `[default]`.
 - **`peak_hours`** — comma-separated peak hour ranges `start-end` (half-open `[start:00, end:00)`), evaluated in the section's timezone.
+- **`peak_days`** — comma-separated weekday tokens `mon`–`sun` or ranges (inclusive, e.g. `mon-fri`; wrap-around ranges like `fri-mon` allowed). Peak hours only apply on these days; omitting the key means all 7 days.
 - **`tz`** — IANA timezone used for peak detection and the effective date (default: system local time).
 - **`peak_input_price` / `peak_output_price` / `peak_cache_write_price` / `peak_cache_read_price`** — prices applied during peak hours.
 
@@ -138,6 +139,8 @@ peak_cache_write_price=9.00
 peak_cache_read_price=0.30
 currency=CNY
 ```
+
+From 2026-08-23 DeepSeek applies peak hours only on weekdays (weekends are off-peak all day) — see the `peak_days=mon-fri` sections in `monitor.ini`.
 
 Tables and CSV also show `Peak` / `Off-peak` cost-split columns (cost billed at peak vs off-peak rates; models without peak config always show 0 in Peak).
 

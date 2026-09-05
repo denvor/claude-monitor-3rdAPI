@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "claude-monitor"
-version = "1.1.0"
+version = "1.2.0"
 description = "Claude Code token usage monitor with custom pricing from monitor.ini"
 requires-python = ">=3.9"
 dependencies = [

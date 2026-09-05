@@ -119,6 +119,7 @@ section 支持两个可选扩展（任意供应商可用；不配置则维持平
 
 - **section 名 `@YYYY-MM-DD` 后缀** — 定价自该日期 00:00（section 的 `tz` 时区）起生效。同一模型取“生效日期最大且不超过记录时间”的版本；记录早于所有带日期版本时回退无日期版本，再回退 `[default]`。
 - **`peak_hours`** — 逗号分隔的高峰整点区间 `start-end`（半开区间 `[start:00, end:00)`），按 section 时区判定。
+- **`peak_days`** — 逗号分隔的星期 token（`mon`–`sun`）或区间（闭区间，如 `mon-fri`；支持跨周末如 `fri-mon`）。高峰小时仅在这些星期生效；不配置则为全周七天。
 - **`tz`** — 高峰判定与生效日期所用 IANA 时区（缺省为系统本地时区）。
 - **`peak_input_price` / `peak_output_price` / `peak_cache_write_price` / `peak_cache_read_price`** — 高峰时段价格。
 
@@ -138,6 +139,8 @@ peak_cache_write_price=9.00
 peak_cache_read_price=0.30
 currency=CNY
 ```
+
+2026-08-23 起 DeepSeek 高峰仅设在工作日（周六/周日全天低谷价）——见 `monitor.ini` 中带 `peak_days=mon-fri` 的 section。
 
 表格与 CSV 同时展示 `Peak` / `Off-peak` 成本拆分列（按峰/谷费率计的成本；无峰谷配置的模型 Peak 恒为 0）。
 
